@@ -1,0 +1,9 @@
+src/
+docs/
+*.test.ts
+vitest.config.ts
+tsup.config.ts
+tsconfig.json
+.gitkeep
+node_modules/
+.DS_Store
