@@ -29,6 +29,10 @@ export class ToolRegistry {
     return this.tools.length;
   }
 
+  getAllTools(): ToolEntry[] {
+    return [...this.tools];
+  }
+
   getServerNames(): string[] {
     return [...new Set(this.tools.map((t) => t.server))];
   }

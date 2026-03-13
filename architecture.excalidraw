@@ -6,8 +6,8 @@
     {
       "type": "text",
       "id": "title",
-      "x": 280,
-      "y": 20,
+      "x": 320,
+      "y": 40,
       "width": 500,
       "height": 40,
       "text": "mcp-lazy Architecture",
@@ -38,8 +38,8 @@
     {
       "type": "text",
       "id": "subtitle",
-      "x": 300,
-      "y": 65,
+      "x": 340,
+      "y": 85,
       "width": 460,
       "height": 20,
       "text": "Lazy-load MCP servers to reduce token usage by 90%+",
@@ -67,12 +67,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "line",
       "id": "col_divider",
-      "x": 500,
-      "y": 110,
+      "x": 540,
+      "y": 130,
       "width": 0,
       "height": 730,
       "strokeColor": "#d1d5db",
@@ -91,14 +90,22 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 730]]
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          730
+        ]
+      ]
     },
-
     {
       "type": "text",
       "id": "col1_title",
-      "x": 60,
-      "y": 120,
+      "x": 100,
+      "y": 140,
       "width": 380,
       "height": 28,
       "text": "SETUP",
@@ -129,8 +136,8 @@
     {
       "type": "text",
       "id": "col1_subtitle",
-      "x": 60,
-      "y": 150,
+      "x": 100,
+      "y": 170,
       "width": 380,
       "height": 18,
       "text": "npx mcp-lazy add --<agent>",
@@ -158,12 +165,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "s1_agent_config",
-      "x": 90,
-      "y": 195,
+      "x": 130,
+      "y": 215,
       "width": 300,
       "height": 100,
       "strokeColor": "#6366f1",
@@ -179,16 +185,27 @@
       "versionNonce": 110006,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "s1_agent_config_text", "type": "text"}, {"id": "s1_arrow1", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "s1_agent_config_text",
+          "type": "text"
+        },
+        {
+          "id": "s1_arrow1",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "s1_agent_config_text",
-      "x": 100,
-      "y": 210,
+      "x": 140,
+      "y": 230,
       "width": 280,
       "height": 70,
       "text": "Agent Config (mcp.json / .toml)\n\nServer A (stdio)\nServer B (URL + OAuth)\nServer C (stdio)",
@@ -216,12 +233,11 @@
       "containerId": "s1_agent_config",
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "s1_arrow1",
-      "x": 240,
-      "y": 300,
+      "x": 280,
+      "y": 320,
       "width": 0,
       "height": 40,
       "strokeColor": "#444444",
@@ -240,17 +256,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 40]],
-      "startBinding": {"elementId": "s1_agent_config", "focus": 0, "gap": 5},
-      "endBinding": {"elementId": "s1_register", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40
+        ]
+      ],
+      "startBinding": {
+        "elementId": "s1_agent_config",
+        "focus": 0,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "s1_register",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
     {
       "type": "text",
       "id": "s1_arrow1_label",
-      "x": 255,
-      "y": 310,
+      "x": 295,
+      "y": 330,
       "width": 60,
       "height": 18,
       "text": "extract",
@@ -278,12 +311,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "s1_register",
-      "x": 90,
-      "y": 345,
+      "x": 130,
+      "y": 365,
       "width": 300,
       "height": 80,
       "strokeColor": "#0891b2",
@@ -299,16 +331,31 @@
       "versionNonce": 110014,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "s1_register_text", "type": "text"}, {"id": "s1_arrow1", "type": "arrow"}, {"id": "s1_arrow2", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "s1_register_text",
+          "type": "text"
+        },
+        {
+          "id": "s1_arrow1",
+          "type": "arrow"
+        },
+        {
+          "id": "s1_arrow2",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "s1_register_text",
-      "x": 100,
-      "y": 355,
+      "x": 140,
+      "y": 375,
       "width": 280,
       "height": 60,
       "text": "registerProxy()\n\nURL servers → npx mcp-remote\nStdio servers → as-is",
@@ -336,12 +383,11 @@
       "containerId": "s1_register",
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "s1_arrow2",
-      "x": 240,
-      "y": 430,
+      "x": 280,
+      "y": 450,
       "width": 0,
       "height": 40,
       "strokeColor": "#444444",
@@ -360,17 +406,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 40]],
-      "startBinding": {"elementId": "s1_register", "focus": 0, "gap": 5},
-      "endBinding": {"elementId": "s1_backup", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40
+        ]
+      ],
+      "startBinding": {
+        "elementId": "s1_register",
+        "focus": 0,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "s1_backup",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
     {
       "type": "text",
       "id": "s1_arrow2_label",
-      "x": 255,
-      "y": 440,
+      "x": 295,
+      "y": 460,
       "width": 100,
       "height": 18,
       "text": "save backup",
@@ -398,12 +461,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "s1_backup",
-      "x": 90,
-      "y": 475,
+      "x": 130,
+      "y": 495,
       "width": 300,
       "height": 95,
       "strokeColor": "#059669",
@@ -419,16 +481,31 @@
       "versionNonce": 110022,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "s1_backup_text", "type": "text"}, {"id": "s1_arrow2", "type": "arrow"}, {"id": "s1_arrow3", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "s1_backup_text",
+          "type": "text"
+        },
+        {
+          "id": "s1_arrow2",
+          "type": "arrow"
+        },
+        {
+          "id": "s1_arrow3",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "s1_backup_text",
-      "x": 100,
-      "y": 488,
+      "x": 140,
+      "y": 508,
       "width": 280,
       "height": 70,
       "text": "~/.mcp-lazy/servers.json\n\nA: { command: \"node\", args: [...] }\nB: { command: \"npx\", args: [\"mcp-remote\", url] }\nC: { command: \"python\", args: [...] }",
@@ -456,12 +533,11 @@
       "containerId": "s1_backup",
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "s1_arrow3",
-      "x": 240,
-      "y": 575,
+      "x": 280,
+      "y": 595,
       "width": 0,
       "height": 40,
       "strokeColor": "#444444",
@@ -480,17 +556,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 40]],
-      "startBinding": {"elementId": "s1_backup", "focus": 0, "gap": 5},
-      "endBinding": {"elementId": "s1_result", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40
+        ]
+      ],
+      "startBinding": {
+        "elementId": "s1_backup",
+        "focus": 0,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "s1_result",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
     {
       "type": "text",
       "id": "s1_arrow3_label",
-      "x": 255,
-      "y": 585,
+      "x": 295,
+      "y": 605,
       "width": 60,
       "height": 18,
       "text": "replace",
@@ -518,12 +611,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "s1_result",
-      "x": 90,
-      "y": 620,
+      "x": 130,
+      "y": 640,
       "width": 300,
       "height": 70,
       "strokeColor": "#7c3aed",
@@ -539,16 +631,27 @@
       "versionNonce": 110030,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "s1_result_text", "type": "text"}, {"id": "s1_arrow3", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "s1_result_text",
+          "type": "text"
+        },
+        {
+          "id": "s1_arrow3",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "s1_result_text",
-      "x": 100,
-      "y": 633,
+      "x": 140,
+      "y": 653,
       "width": 280,
       "height": 45,
       "text": "Agent config replaced:\nonly mcp-lazy entry remains\n{ \"mcpServers\": { \"mcp-lazy\": {...} } }",
@@ -576,12 +679,11 @@
       "containerId": "s1_result",
       "lineHeight": 1.25
     },
-
     {
       "type": "text",
       "id": "s1_agents_label",
-      "x": 90,
-      "y": 710,
+      "x": 130,
+      "y": 730,
       "width": 300,
       "height": 80,
       "text": "Supported agents:\nCursor  /  Windsurf  /  Opencode\nAntigravity  /  Codex\n(JSON, TOML, Opencode formats)",
@@ -609,12 +711,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "text",
       "id": "col2_title",
-      "x": 545,
-      "y": 120,
+      "x": 585,
+      "y": 140,
       "width": 380,
       "height": 28,
       "text": "RUNTIME",
@@ -645,8 +746,8 @@
     {
       "type": "text",
       "id": "col2_subtitle",
-      "x": 545,
-      "y": 150,
+      "x": 585,
+      "y": 170,
       "width": 380,
       "height": 18,
       "text": "Agent calls mcp-lazy proxy at startup",
@@ -674,12 +775,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "ellipse",
       "id": "r_agent",
-      "x": 680,
-      "y": 190,
+      "x": 720,
+      "y": 210,
       "width": 170,
       "height": 65,
       "strokeColor": "#6366f1",
@@ -695,15 +795,24 @@
       "versionNonce": 120006,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_agent_text", "type": "text"}, {"id": "r_arrow1", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "r_agent_text",
+          "type": "text"
+        },
+        {
+          "id": "r_arrow1",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false
     },
     {
       "type": "text",
       "id": "r_agent_text",
-      "x": 710,
-      "y": 205,
+      "x": 750,
+      "y": 225,
       "width": 110,
       "height": 35,
       "text": "AI Agent\n(Cursor, Codex...)",
@@ -731,12 +840,11 @@
       "containerId": "r_agent",
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "r_arrow1",
-      "x": 765,
-      "y": 260,
+      "x": 805,
+      "y": 280,
       "width": 0,
       "height": 35,
       "strokeColor": "#444444",
@@ -755,17 +863,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 35]],
-      "startBinding": {"elementId": "r_agent", "focus": 0, "gap": 5},
-      "endBinding": {"elementId": "r_proxy", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          35
+        ]
+      ],
+      "startBinding": {
+        "elementId": "r_agent",
+        "focus": 0,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "r_proxy",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
     {
       "type": "text",
       "id": "r_arrow1_label",
-      "x": 775,
-      "y": 268,
+      "x": 815,
+      "y": 288,
       "width": 100,
       "height": 18,
       "text": "sees 2 tools only",
@@ -793,12 +918,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_proxy",
-      "x": 620,
-      "y": 300,
+      "x": 660,
+      "y": 320,
       "width": 290,
       "height": 170,
       "strokeColor": "#0891b2",
@@ -814,16 +938,31 @@
       "versionNonce": 120014,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_arrow1", "type": "arrow"}, {"id": "r_arrow_left", "type": "arrow"}, {"id": "r_arrow_right", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "r_arrow1",
+          "type": "arrow"
+        },
+        {
+          "id": "r_arrow_left",
+          "type": "arrow"
+        },
+        {
+          "id": "r_arrow_right",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_proxy_title",
-      "x": 695,
-      "y": 308,
+      "x": 735,
+      "y": 328,
       "width": 140,
       "height": 20,
       "text": "mcp-lazy proxy",
@@ -851,12 +990,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_tool1",
-      "x": 640,
-      "y": 338,
+      "x": 680,
+      "y": 358,
       "width": 250,
       "height": 30,
       "strokeColor": "#0e7490",
@@ -872,16 +1010,23 @@
       "versionNonce": 120018,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_tool1_text", "type": "text"}],
+      "boundElements": [
+        {
+          "id": "r_tool1_text",
+          "type": "text"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_tool1_text",
-      "x": 650,
-      "y": 341,
+      "x": 690,
+      "y": 361,
       "width": 230,
       "height": 25,
       "text": "mcp_search_tools",
@@ -909,12 +1054,11 @@
       "containerId": "r_tool1",
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_tool2",
-      "x": 640,
-      "y": 376,
+      "x": 680,
+      "y": 396,
       "width": 250,
       "height": 30,
       "strokeColor": "#0e7490",
@@ -930,16 +1074,23 @@
       "versionNonce": 120022,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_tool2_text", "type": "text"}],
+      "boundElements": [
+        {
+          "id": "r_tool2_text",
+          "type": "text"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_tool2_text",
-      "x": 650,
-      "y": 379,
+      "x": 690,
+      "y": 399,
       "width": 230,
       "height": 25,
       "text": "mcp_execute_tool",
@@ -967,12 +1118,11 @@
       "containerId": "r_tool2",
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_registry",
-      "x": 640,
-      "y": 415,
+      "x": 680,
+      "y": 435,
       "width": 250,
       "height": 40,
       "strokeColor": "#0e7490",
@@ -988,16 +1138,23 @@
       "versionNonce": 120026,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_registry_text", "type": "text"}],
+      "boundElements": [
+        {
+          "id": "r_registry_text",
+          "type": "text"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_registry_text",
-      "x": 650,
-      "y": 420,
+      "x": 690,
+      "y": 440,
       "width": 230,
       "height": 30,
       "text": "ToolRegistry\n(weighted keyword search)",
@@ -1025,12 +1182,11 @@
       "containerId": "r_registry",
       "lineHeight": 1.25
     },
-
     {
       "type": "text",
       "id": "r_token_label",
-      "x": 680,
-      "y": 472,
+      "x": 720,
+      "y": 492,
       "width": 170,
       "height": 18,
       "text": "~2,100 tokens (vs ~67,000)",
@@ -1058,12 +1214,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "text",
       "id": "r_branch_label_left",
-      "x": 560,
-      "y": 505,
+      "x": 600,
+      "y": 525,
       "width": 120,
       "height": 18,
       "text": "Stdio servers",
@@ -1094,8 +1249,8 @@
     {
       "type": "text",
       "id": "r_branch_label_right",
-      "x": 850,
-      "y": 505,
+      "x": 890,
+      "y": 525,
       "width": 120,
       "height": 18,
       "text": "URL servers",
@@ -1123,12 +1278,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "r_arrow_left",
-      "x": 710,
-      "y": 475,
+      "x": 750,
+      "y": 495,
       "width": 90,
       "height": 60,
       "strokeColor": "#059669",
@@ -1147,18 +1301,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [-90, 60]],
-      "startBinding": {"elementId": "r_proxy", "focus": -0.3, "gap": 5},
-      "endBinding": {"elementId": "r_stdio_server", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -90,
+          60
+        ]
+      ],
+      "startBinding": {
+        "elementId": "r_proxy",
+        "focus": -0.3,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "r_stdio_server",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
-
     {
       "type": "arrow",
       "id": "r_arrow_right",
-      "x": 820,
-      "y": 475,
+      "x": 860,
+      "y": 495,
       "width": 90,
       "height": 60,
       "strokeColor": "#d97706",
@@ -1177,18 +1347,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [90, 60]],
-      "startBinding": {"elementId": "r_proxy", "focus": 0.3, "gap": 5},
-      "endBinding": {"elementId": "r_mcpremote", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          90,
+          60
+        ]
+      ],
+      "startBinding": {
+        "elementId": "r_proxy",
+        "focus": 0.3,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "r_mcpremote",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
-
     {
       "type": "text",
       "id": "r_left_lazy",
-      "x": 600,
-      "y": 490,
+      "x": 640,
+      "y": 510,
       "width": 60,
       "height": 18,
       "text": "lazy-load",
@@ -1219,8 +1405,8 @@
     {
       "type": "text",
       "id": "r_right_lazy",
-      "x": 870,
-      "y": 490,
+      "x": 910,
+      "y": 510,
       "width": 60,
       "height": 18,
       "text": "lazy-load",
@@ -1248,12 +1434,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_stdio_server",
-      "x": 540,
-      "y": 540,
+      "x": 580,
+      "y": 560,
       "width": 240,
       "height": 50,
       "strokeColor": "#059669",
@@ -1269,16 +1454,27 @@
       "versionNonce": 130014,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_stdio_text", "type": "text"}, {"id": "r_arrow_left", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "r_stdio_text",
+          "type": "text"
+        },
+        {
+          "id": "r_arrow_left",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_stdio_text",
-      "x": 550,
-      "y": 548,
+      "x": 590,
+      "y": 568,
       "width": 220,
       "height": 35,
       "text": "MCP Server A, C...\n(direct stdio connection)",
@@ -1306,12 +1502,11 @@
       "containerId": "r_stdio_server",
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_mcpremote",
-      "x": 830,
-      "y": 540,
+      "x": 870,
+      "y": 560,
       "width": 240,
       "height": 65,
       "strokeColor": "#d97706",
@@ -1327,16 +1522,31 @@
       "versionNonce": 130018,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_mcpremote_text", "type": "text"}, {"id": "r_arrow_right", "type": "arrow"}, {"id": "r_arrow_oauth", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "r_mcpremote_text",
+          "type": "text"
+        },
+        {
+          "id": "r_arrow_right",
+          "type": "arrow"
+        },
+        {
+          "id": "r_arrow_oauth",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_mcpremote_text",
-      "x": 840,
-      "y": 548,
+      "x": 880,
+      "y": 568,
       "width": 220,
       "height": 50,
       "text": "npx mcp-remote\n(stdio ↔ HTTP/SSE bridge)\nHandles OAuth automatically",
@@ -1364,12 +1574,11 @@
       "containerId": "r_mcpremote",
       "lineHeight": 1.25
     },
-
     {
       "type": "arrow",
       "id": "r_arrow_oauth",
-      "x": 950,
-      "y": 610,
+      "x": 990,
+      "y": 630,
       "width": 0,
       "height": 40,
       "strokeColor": "#d97706",
@@ -1388,17 +1597,34 @@
       "boundElements": null,
       "link": null,
       "locked": false,
-      "points": [[0, 0], [0, 40]],
-      "startBinding": {"elementId": "r_mcpremote", "focus": 0, "gap": 5},
-      "endBinding": {"elementId": "r_url_server", "focus": 0, "gap": 5},
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          40
+        ]
+      ],
+      "startBinding": {
+        "elementId": "r_mcpremote",
+        "focus": 0,
+        "gap": 5
+      },
+      "endBinding": {
+        "elementId": "r_url_server",
+        "focus": 0,
+        "gap": 5
+      },
       "startArrowhead": null,
       "endArrowhead": "arrow"
     },
     {
       "type": "text",
       "id": "r_arrow_oauth_label",
-      "x": 960,
-      "y": 620,
+      "x": 1000,
+      "y": 640,
       "width": 70,
       "height": 18,
       "text": "HTTP/SSE",
@@ -1426,12 +1652,11 @@
       "containerId": null,
       "lineHeight": 1.25
     },
-
     {
       "type": "rectangle",
       "id": "r_url_server",
-      "x": 850,
-      "y": 655,
+      "x": 890,
+      "y": 675,
       "width": 200,
       "height": 45,
       "strokeColor": "#dc2626",
@@ -1447,16 +1672,27 @@
       "versionNonce": 130026,
       "isDeleted": false,
       "groupIds": [],
-      "boundElements": [{"id": "r_url_text", "type": "text"}, {"id": "r_arrow_oauth", "type": "arrow"}],
+      "boundElements": [
+        {
+          "id": "r_url_text",
+          "type": "text"
+        },
+        {
+          "id": "r_arrow_oauth",
+          "type": "arrow"
+        }
+      ],
       "link": null,
       "locked": false,
-      "roundness": {"type": 3}
+      "roundness": {
+        "type": 3
+      }
     },
     {
       "type": "text",
       "id": "r_url_text",
-      "x": 860,
-      "y": 665,
+      "x": 900,
+      "y": 685,
       "width": 180,
       "height": 25,
       "text": "MCP Server B (URL+OAuth)",
@@ -1484,12 +1720,11 @@
       "containerId": "r_url_server",
       "lineHeight": 1.25
     },
-
     {
       "type": "text",
       "id": "r_url_example",
-      "x": 840,
-      "y": 710,
+      "x": 880,
+      "y": 730,
       "width": 220,
       "height": 18,
       "text": "e.g. Notion, Slack (OAuth required)",
@@ -1516,6 +1751,54 @@
       "locked": false,
       "containerId": null,
       "lineHeight": 1.25
+    },
+    {
+      "type": "rectangle",
+      "id": "pad_left",
+      "x": 70,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "strokeColor": "transparent",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 0,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 0,
+      "angle": 0,
+      "seed": 999001,
+      "version": 1,
+      "versionNonce": 999002,
+      "isDeleted": false,
+      "groupIds": [],
+      "boundElements": null,
+      "link": null,
+      "locked": false
+    },
+    {
+      "type": "rectangle",
+      "id": "pad_right",
+      "x": 1140,
+      "y": 0,
+      "width": 1,
+      "height": 1,
+      "strokeColor": "transparent",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 0,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 0,
+      "angle": 0,
+      "seed": 999003,
+      "version": 1,
+      "versionNonce": 999004,
+      "isDeleted": false,
+      "groupIds": [],
+      "boundElements": null,
+      "link": null,
+      "locked": false
     }
   ],
   "appState": {

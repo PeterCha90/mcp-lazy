@@ -40,7 +40,7 @@ program
   });
 
 async function runServe(): Promise<void> {
-  const { loadServersBackup } = await import("./utils/config.js");
+  const { loadServersBackup, computeServerFingerprint, loadToolCache, saveToolCache } = await import("./utils/config.js");
   const { ToolRegistry, extractKeywords } = await import("./proxy/registry.js");
   const { ServerLoader } = await import("./proxy/loader.js");
   const { startProxyServer } = await import("./proxy/server.js");
@@ -59,33 +59,60 @@ async function runServe(): Promise<void> {
 
   // Build the tool registry by connecting to each server once
   const registry = new ToolRegistry();
+  const startMs = Date.now();
 
-  for (const name of serverNames) {
-    const serverConfig = servers[name];
-    try {
-      if (!serverConfig.command) {
-        console.error(`Warning: ${name} has no command configured, skipping`);
-        continue;
-      }
-      const conn = await connectToServer(serverConfig.command, serverConfig.args, serverConfig.env);
-      const tools = await listServerTools(conn.client);
+  const fingerprint = computeServerFingerprint(servers);
+  const cached = loadToolCache();
 
-      for (const tool of tools) {
-        registry.addTool({
+  if (cached && cached.fingerprint === fingerprint) {
+    // Cache hit: load tools directly, skip all connections
+    for (const entry of cached.tools) {
+      registry.addTool(entry);
+    }
+    const elapsed = Date.now() - startMs;
+    console.error(`mcp-lazy: loaded ${registry.getToolCount()} tools from cache in ${elapsed}ms`);
+  } else {
+    // Cache miss or config changed: connect to all servers in parallel
+    const results = await Promise.allSettled(
+      serverNames.map(async (name) => {
+        const serverConfig = servers[name];
+        if (!serverConfig.command) {
+          console.error(`Warning: ${name} has no command configured, skipping`);
+          return [];
+        }
+        const conn = await connectToServer(serverConfig.command, serverConfig.args, serverConfig.env);
+        const tools = await listServerTools(conn.client);
+        await disconnectServer(conn);
+        return tools.map((tool) => ({
           name: tool.name,
           description: tool.description ?? "",
           server: name,
           serverDescription: serverConfig.description ?? "",
           inputSchema: tool.inputSchema,
           keywords: extractKeywords(tool.name, tool.description ?? ""),
-        });
-      }
+        }));
+      })
+    );
 
-      await disconnectServer(conn);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error(`Warning: could not connect to ${name}: ${message}`);
+    let successCount = 0;
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      if (result.status === "fulfilled") {
+        for (const entry of result.value) {
+          registry.addTool(entry);
+        }
+        if (result.value.length > 0) successCount++;
+      } else {
+        const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
+        console.error(`Warning: could not connect to ${serverNames[i]}: ${message}`);
+      }
     }
+
+    const elapsed = Date.now() - startMs;
+    console.error(`mcp-lazy: discovered ${registry.getToolCount()} tools from ${successCount} servers in ${elapsed}ms`);
+
+    // Save cache for next startup
+    saveToolCache(fingerprint, registry.getAllTools());
   }
 
   if (registry.getToolCount() === 0) {

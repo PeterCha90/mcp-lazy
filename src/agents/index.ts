@@ -169,7 +169,7 @@ export function registerProxy(
 
     // Strip ALL mcp_servers sections (including URL ones)
     let cleaned = existingContent.replace(
-      /\n?\[mcp_servers\.[^\]]+\][^\[]*/g,
+      /\n?\[mcp_servers\.[^\]]+\](?:\n(?!\[)[^\n]*)*/g,
       ""
     ).trimEnd();
 

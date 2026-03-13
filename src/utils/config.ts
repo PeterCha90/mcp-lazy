@@ -2,6 +2,7 @@ import { z } from "zod";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { homedir } from "node:os";
+import { createHash } from "node:crypto";
 
 // Schema for a single MCP server config entry
 // Supports stdio servers (command+args) and URL-based servers (url)
@@ -190,6 +191,54 @@ export function extractServersFromConfig(configPath: string): Record<string, Ser
   } catch {
     return {};
   }
+}
+
+function getToolCachePath(): string {
+  return resolve(homedir(), ".mcp-lazy", "tool-cache.json");
+}
+
+/**
+ * Compute a fingerprint for a set of server configs.
+ * Any change to server names, commands, or args invalidates the cache.
+ */
+export function computeServerFingerprint(servers: Record<string, ServerConfig>): string {
+  const parts = Object.keys(servers)
+    .sort()
+    .map((name) => {
+      const s = servers[name];
+      return `${name}:${s.command ?? ""}:${(s.args ?? []).join(",")}`;
+    });
+  return createHash("sha256").update(parts.join("|")).digest("hex");
+}
+
+/**
+ * Load the tool cache from ~/.mcp-lazy/tool-cache.json.
+ * Returns null if the file does not exist or cannot be parsed.
+ */
+export function loadToolCache(): { fingerprint: string; tools: any[] } | null {
+  const cachePath = getToolCachePath();
+  if (!existsSync(cachePath)) return null;
+  try {
+    const raw = JSON.parse(readFileSync(cachePath, "utf-8"));
+    if (typeof raw.fingerprint === "string" && Array.isArray(raw.tools)) {
+      return raw as { fingerprint: string; tools: any[] };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Save the tool cache to ~/.mcp-lazy/tool-cache.json.
+ */
+export function saveToolCache(fingerprint: string, tools: any[]): void {
+  const cachePath = getToolCachePath();
+  const dir = dirname(cachePath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(cachePath, JSON.stringify({ fingerprint, tools }, null, 2) + "\n");
 }
 
 /**
