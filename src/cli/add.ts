@@ -1,12 +1,18 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
 import {
   AGENTS,
   getAgentByName,
-  detectInstalledAgents,
   registerProxy,
   type AgentInfo,
 } from "../agents/index.js";
+
+const BANNER = `
+\x1b[36m\x1b[1m ███╗   ███╗ ██████╗██████╗       ██╗      █████╗ ███████╗██╗   ██╗
+ ████╗ ████║██╔════╝██╔══██╗      ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝
+ ██╔████╔██║██║     ██████╔╝█████╗██║     ███████║  ███╔╝  ╚████╔╝
+ ██║╚██╔╝██║██║     ██╔═══╝ ╚════╝██║     ██╔══██║ ███╔╝    ╚██╔╝
+ ██║ ╚═╝ ██║╚██████╗██║           ███████╗██║  ██║███████╗   ██║
+ ╚═╝     ╚═╝ ╚═════╝╚═╝           ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝\x1b[0m
+`;
 
 interface AddOptions {
   cursor?: boolean;
@@ -18,14 +24,7 @@ interface AddOptions {
 }
 
 export async function runAdd(options: AddOptions): Promise<void> {
-  const cwd = process.cwd();
-  const configPath = resolve(cwd, "mcp-lazy-config.json");
-
-  if (!existsSync(configPath)) {
-    console.log("\n  mcp-lazy-config.json not found.");
-    console.log("  Run 'mcp-lazy init' first to generate the config.\n");
-    process.exit(1);
-  }
+  console.log(BANNER);
 
   // Determine which agents to register
   let targets: AgentInfo[] = [];
@@ -52,7 +51,7 @@ export async function runAdd(options: AddOptions): Promise<void> {
   }
 
   if (targets.length === 0) {
-    console.log("\n  No agent specified. Use one of:");
+    console.log("  No agent specified. Use one of:");
     console.log("    mcp-lazy add --cursor");
     console.log("    mcp-lazy add --windsurf");
     console.log("    mcp-lazy add --opencode");
@@ -62,17 +61,14 @@ export async function runAdd(options: AddOptions): Promise<void> {
     process.exit(1);
   }
 
-  console.log("\nRegistering mcp-lazy proxy...\n");
+  console.log("  Registering mcp-lazy proxy...\n");
 
   for (const agent of targets) {
     try {
-      const { configPath: agentConfigPath, created } = registerProxy(
-        agent,
-        configPath
-      );
+      const { configPath, created, serverCount } = registerProxy(agent);
       const action = created ? "created" : "updated";
-      const note = agent.note ? ` (${agent.note})` : "";
-      console.log(`  ✓ ${agent.displayName}: ${action} ${agentConfigPath}${note}`);
+      const servers = serverCount > 0 ? ` (${serverCount} servers captured)` : "";
+      console.log(`  ✓ ${agent.displayName}: ${action} ${configPath}${servers}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.log(`  ✗ ${agent.displayName}: failed - ${message}`);

@@ -1,3 +1,12 @@
+<pre>
+███╗   ███╗ ██████╗██████╗       ██╗      █████╗ ███████╗██╗   ██╗
+████╗ ████║██╔════╝██╔══██╗      ██║     ██╔══██╗╚══███╔╝╚██╗ ██╔╝
+██╔████╔██║██║     ██████╔╝█████╗██║     ███████║  ███╔╝  ╚████╔╝
+██║╚██╔╝██║██║     ██╔═══╝ ╚════╝██║     ██╔══██║ ███╔╝    ╚██╔╝
+██║ ╚═╝ ██║╚██████╗██║           ███████╗██║  ██║███████╗   ██║
+╚═╝     ╚═╝ ╚═════╝╚═╝           ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝
+</pre>
+
 # mcp-lazy
 
 [한국어](./docs/README.ko.md)
@@ -9,20 +18,19 @@ MCP servers load all tool definitions into the context window at startup — eve
 ## Quick Start
 
 ```bash
-npx mcp-lazy init
-```
-
-Then register with your agents:
-
-```bash
-npx mcp-lazy add --codex
 npx mcp-lazy add --cursor
+npx mcp-lazy add --codex
 npx mcp-lazy add --antigravity
+npx mcp-lazy add --all          # or register all at once
 ```
 
-That's it. `init` auto-detects your MCP configs and generates a proxy config. `add` registers it with your AI agents.
+That's it. The `add` command reads your agent's existing MCP config, saves all server definitions to `~/.mcp-lazy/servers.json`, and replaces the agent config with only the mcp-lazy proxy entry.
+
+> **Tip:** Installed a new MCP server? Just re-run `npx mcp-lazy add --<agent>` — no extra steps.
 
 ## How It Works
+
+![mcp-lazy Architecture](./architecture.png)
 
 ```
 Without mcp-lazy:
@@ -33,6 +41,7 @@ With mcp-lazy:
   Agent → mcp-lazy proxy (2 tools only, ~2,100 tokens)
               ↓ on-demand
          Server A / B / C (loaded only when needed)
+         URL servers (Notion, Slack, etc.) via mcp-remote bridge
 ```
 
 The proxy exposes just 2 tools:
@@ -40,48 +49,45 @@ The proxy exposes just 2 tools:
 - **mcp_search_tools** — Search available tools by keyword
 - **mcp_execute_tool** — Execute a tool (lazy-loads the server on first call)
 
+## What `add` Does
+
+When you run `npx mcp-lazy add --<agent>`, it:
+
+1. Reads your agent's existing MCP server config
+2. Extracts all server definitions (stdio and URL-based)
+3. Converts URL servers (OAuth-requiring services like Notion, Slack) to stdio commands using `npx mcp-remote <url>`
+4. Saves everything to `~/.mcp-lazy/servers.json`
+5. Replaces the agent config with only the mcp-lazy proxy entry
+
+The proxy reads from `~/.mcp-lazy/servers.json` at runtime — that's where all your server definitions live after setup.
+
 ## Supported Agents
 
 | Agent       | Status                      |
 | ----------- | --------------------------- |
-| Codex       | ✓ Supported                 |
 | Cursor      | ✓ Supported                 |
 | Windsurf    | ✓ Supported                 |
 | Opencode    | ✓ Supported                 |
 | Antigravity | ✓ Supported                 |
+| Codex       | ✓ Supported                 |
 | Claude Code | Native support (not needed) |
 
 ## Commands
 
-### `npx mcp-lazy init`
-
-Auto-detect MCP configs and set up the proxy:
-
-```bash
-$ npx mcp-lazy init
-
-Found .mcp.json (7 servers)
-Collecting tools...
-  ✓ github-mcp        (27 tools, ~17,550 tokens)
-  ✓ postgres-mcp      (12 tools, ~7,800 tokens)
-  ✓ filesystem-mcp    ( 8 tools, ~5,200 tokens)
-
-Current estimated token usage: 67,300 tokens
-With mcp-lazy:              2,100 tokens (97% reduction)
-
-✓ mcp-lazy-config.json created
-✓ Registered with Cursor
-```
-
 ### `npx mcp-lazy add`
 
-Register the proxy with specific agents:
+Register the proxy with your agent:
 
 ```bash
-npx mcp-lazy add --cursor
-npx mcp-lazy add --windsurf
-npx mcp-lazy add --all
+npx mcp-lazy add --cursor        # register with Cursor
+npx mcp-lazy add --antigravity   # register with Antigravity
+npx mcp-lazy add --all           # register with all agents
 ```
+
+Options:
+
+- `--cursor`, `--windsurf`, `--opencode`, `--antigravity`, `--codex` — target agent
+- `--all` — register with all agents
 
 ### `npx mcp-lazy doctor`
 
@@ -91,17 +97,25 @@ Diagnose your setup:
 $ npx mcp-lazy doctor
 
 ✓ Node.js 18+ installed
-✓ mcp-lazy-config.json found
+✓ 7 MCP server(s) registered
+  - github, notion, slack, postgres, filesystem, memory, puppeteer
 ✓ Cursor: registered
 ✗ Windsurf: not registered → npx mcp-lazy add --windsurf
 
 Token savings: 67,300 → 2,100 (97% reduction)
 ```
 
-## Requirements
+## URL & OAuth Support
 
-- Node.js 18+
-- Existing MCP server configurations
+Some MCP servers are hosted at a URL and require OAuth (Notion, Slack, Linear, etc.). The `add` command automatically handles these by converting them to stdio commands using `npx mcp-remote`:
+
+```
+URL server: https://mcp.notion.com/sse
+          ↓ converted automatically
+stdio:    npx mcp-remote https://mcp.notion.com/sse
+```
+
+This means all your servers — local stdio and remote OAuth-requiring URL servers — get proxied through mcp-lazy with no manual conversion needed.
 
 ## How Search Works
 
@@ -116,23 +130,10 @@ When an agent calls `mcp_search_tools("query database")`, the proxy searches acr
 
 Results are sorted by relevance and returned to the agent.
 
-## Configuration
+## Requirements
 
-The `mcp-lazy-config.json` file stores your server configs:
-
-```json
-{
-  "version": "1.0",
-  "servers": {
-    "github-mcp": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" },
-      "description": "GitHub operations: issues, PRs, repos"
-    }
-  }
-}
-```
+- Node.js 18+
+- Existing MCP server configurations
 
 ## License
 

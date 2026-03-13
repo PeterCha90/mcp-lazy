@@ -1,12 +1,16 @@
 import { z } from "zod";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { resolve, dirname } from "node:path";
 import { homedir } from "node:os";
 
 // Schema for a single MCP server config entry
+// Supports stdio servers (command+args) and URL-based servers (url)
 const ServerConfigSchema = z.object({
-  command: z.string(),
+  command: z.string().optional(),
   args: z.array(z.string()).default([]),
+  url: z.string().optional(),
+  serverUrl: z.string().optional(),
+  headers: z.record(z.string()).optional(),
   env: z.record(z.string()).optional(),
   description: z.string().optional(),
 });
@@ -18,78 +22,210 @@ const McpJsonSchema = z.object({
   mcpServers: z.record(ServerConfigSchema),
 });
 
-// Schema for mcp-lazy-config.json
-const LazyConfigSchema = z.object({
-  version: z.string().default("1.0"),
-  servers: z.record(ServerConfigSchema),
-});
+function getBackupPath(): string {
+  return resolve(homedir(), ".mcp-lazy", "servers.json");
+}
 
-export type LazyConfig = z.infer<typeof LazyConfigSchema>;
+/**
+ * Save servers to ~/.mcp-lazy/servers.json (merges with existing)
+ */
+export function saveServersBackup(servers: Record<string, ServerConfig>): void {
+  const existing = loadServersBackup();
+  const merged = { ...existing, ...servers };
+  // Never include mcp-lazy itself
+  delete merged["mcp-lazy"];
 
-// All possible config file locations to search
-const CONFIG_SEARCH_PATHS = [
-  ".mcp.json",
-  ".cursor/mcp.json",
-  ".opencode/mcp.json",
-  ".agents/mcp.json",
-];
+  const dir = dirname(getBackupPath());
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(getBackupPath(), JSON.stringify({ servers: merged }, null, 2) + "\n");
+}
 
-const HOME_CONFIG_PATHS = [
-  ".cursor/mcp.json",
-  ".codeium/windsurf/mcp_config.json",
-  "claude_desktop_config.json",
-];
+/**
+ * Load servers from ~/.mcp-lazy/servers.json
+ */
+export function loadServersBackup(): Record<string, ServerConfig> {
+  if (!existsSync(getBackupPath())) {
+    return {};
+  }
+  try {
+    const raw = JSON.parse(readFileSync(getBackupPath(), "utf-8"));
+    return raw.servers ?? {};
+  } catch {
+    return {};
+  }
+}
 
-export function findMcpConfigs(cwd: string = process.cwd()): { path: string; servers: Record<string, ServerConfig> }[] {
-  const results: { path: string; servers: Record<string, ServerConfig> }[] = [];
-  const home = homedir();
+/**
+ * Convert a URL-based server config to a mcp-remote stdio command.
+ * e.g., { url: "https://mcp.notion.com/mcp", headers: { "Auth": "Bearer x" } }
+ * → { command: "npx", args: ["-y", "mcp-remote", "https://mcp.notion.com/mcp", "--header", "Auth:Bearer x"] }
+ */
+export function convertUrlToMcpRemote(url: string, headers?: Record<string, string>): ServerConfig {
+  const args = ["-y", "mcp-remote", url];
+  if (headers) {
+    for (const [key, value] of Object.entries(headers)) {
+      args.push("--header", `${key}:${value}`);
+    }
+  }
+  return { command: "npx", args };
+}
 
-  // Search in current directory
-  for (const rel of CONFIG_SEARCH_PATHS) {
-    const fullPath = resolve(cwd, rel);
-    if (existsSync(fullPath)) {
-      try {
-        const raw = JSON.parse(readFileSync(fullPath, "utf-8"));
-        const parsed = McpJsonSchema.safeParse(raw);
-        if (parsed.success) {
-          results.push({ path: fullPath, servers: parsed.data.mcpServers });
-        }
-      } catch {}
+/**
+ * Extract MCP servers from a TOML config file (Codex format)
+ * Parses [mcp_servers.XXX] sections and extracts command/args.
+ * Filters out mcp-lazy entries.
+ */
+export function extractServersFromToml(content: string): Record<string, ServerConfig> {
+  const servers: Record<string, ServerConfig> = {};
+  // Match all [mcp_servers.XXX] section headers
+  const sectionRegex = /^\[mcp_servers\.([^\]]+)\]/gm;
+  let match: RegExpExecArray | null;
+
+  while ((match = sectionRegex.exec(content)) !== null) {
+    const name = match[1];
+    if (name === "mcp-lazy") continue;
+
+    const sectionStart = match.index + match[0].length;
+    // Find next section header (any [xxx]) or end of string
+    const nextSection = /^\[[^\]]+\]/m.exec(content.slice(sectionStart));
+    const sectionContent = nextSection
+      ? content.slice(sectionStart, sectionStart + nextSection.index)
+      : content.slice(sectionStart);
+
+    // Extract command
+    const cmdMatch = /^\s*command\s*=\s*"([^"]+)"/m.exec(sectionContent);
+    const command = cmdMatch ? cmdMatch[1] : undefined;
+
+    // Extract url (for HTTP/SSE-based servers)
+    const urlMatch = /^\s*url\s*=\s*"([^"]*)"/m.exec(sectionContent);
+    const serverUrlMatch = /^\s*serverUrl\s*=\s*"([^"]*)"/m.exec(sectionContent);
+    const url = urlMatch ? urlMatch[1] : (serverUrlMatch ? serverUrlMatch[1] : undefined);
+
+    // Extract args array: args = ["a", "b", ...]
+    const argsMatch = /^\s*args\s*=\s*\[([^\]]*)\]/m.exec(sectionContent);
+    const args: string[] = [];
+    if (argsMatch) {
+      const inner = argsMatch[1];
+      const itemRegex = /"([^"]*)"/g;
+      let item: RegExpExecArray | null;
+      while ((item = itemRegex.exec(inner)) !== null) {
+        args.push(item[1]);
+      }
+    }
+
+    // Extract env from [mcp_servers.NAME.env] subsection
+    const env: Record<string, string> = {};
+    const envSectionRegex = new RegExp(`^\\[mcp_servers\\.${name}\\.env\\]`, "m");
+    if (envSectionRegex.test(content)) {
+      const envStart = content.indexOf(`[mcp_servers.${name}.env]`) + `[mcp_servers.${name}.env]`.length;
+      const envEnd = /^\[[^\]]+\]/m.exec(content.slice(envStart));
+      const envContent = envEnd
+        ? content.slice(envStart, envStart + envEnd.index)
+        : content.slice(envStart);
+
+      const envPairRegex = /^\s*(\w+)\s*=\s*"([^"]*)"/gm;
+      let envMatch: RegExpExecArray | null;
+      while ((envMatch = envPairRegex.exec(envContent)) !== null) {
+        env[envMatch[1]] = envMatch[2];
+      }
+    }
+
+    // Extract headers from [mcp_servers.NAME.http_headers] subsection
+    const headers: Record<string, string> = {};
+    const headersSectionRegex = new RegExp(`^\\[mcp_servers\\.${name}\\.http_headers\\]`, "m");
+    if (headersSectionRegex.test(content)) {
+      const headersStart = content.indexOf(`[mcp_servers.${name}.http_headers]`) + `[mcp_servers.${name}.http_headers]`.length;
+      const headersEnd = /^\[[^\]]+\]/m.exec(content.slice(headersStart));
+      const headersContent = headersEnd
+        ? content.slice(headersStart, headersStart + headersEnd.index)
+        : content.slice(headersStart);
+      const headerPairRegex = /^\s*(\S+)\s*=\s*"([^"]*)"/gm;
+      let headerMatch: RegExpExecArray | null;
+      while ((headerMatch = headerPairRegex.exec(headersContent)) !== null) {
+        headers[headerMatch[1]] = headerMatch[2];
+      }
+    }
+
+    // Extract bearer_token_env_var and resolve to Authorization header
+    const bearerMatch = /^\s*bearer_token_env_var\s*=\s*"([^"]*)"/m.exec(sectionContent);
+    if (bearerMatch) {
+      const envVarName = bearerMatch[1];
+      const token = process.env[envVarName];
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
+    if (command) {
+      servers[name] = { command, args, ...(url && { url }), ...(Object.keys(env).length > 0 && { env }), ...(Object.keys(headers).length > 0 && { headers }) };
+    } else if (url) {
+      servers[name] = { args, url, ...(Object.keys(env).length > 0 && { env }), ...(Object.keys(headers).length > 0 && { headers }) };
     }
   }
 
-  // Search in home directory
-  for (const rel of HOME_CONFIG_PATHS) {
-    const fullPath = resolve(home, rel);
-    if (existsSync(fullPath)) {
-      try {
-        const raw = JSON.parse(readFileSync(fullPath, "utf-8"));
-        const parsed = McpJsonSchema.safeParse(raw);
-        if (parsed.success) {
-          results.push({ path: fullPath, servers: parsed.data.mcpServers });
-        }
-      } catch {}
+  return servers;
+}
+
+/**
+ * Extract MCP servers from an agent's config file (JSON format)
+ */
+export function extractServersFromConfig(configPath: string): Record<string, ServerConfig> {
+  if (!existsSync(configPath)) return {};
+  try {
+    const raw = JSON.parse(readFileSync(configPath, "utf-8"));
+    const parsed = McpJsonSchema.safeParse(raw);
+    if (!parsed.success) return {};
+    const servers = { ...parsed.data.mcpServers };
+    delete servers["mcp-lazy"];
+    // Normalize serverUrl → url
+    for (const config of Object.values(servers)) {
+      if (config.serverUrl && !config.url) {
+        config.url = config.serverUrl;
+      }
+      delete (config as any).serverUrl;
     }
+    return servers;
+  } catch {
+    return {};
   }
-
-  return results;
 }
 
-export function loadLazyConfig(configPath: string): LazyConfig {
-  const raw = JSON.parse(readFileSync(configPath, "utf-8"));
-  return LazyConfigSchema.parse(raw);
-}
+/**
+ * Extract MCP servers from Opencode's config format.
+ * Opencode uses { mcp: { name: { type, command: [...], environment } } }
+ */
+export function extractServersFromOpencodeConfig(configPath: string): Record<string, ServerConfig> {
+  if (!existsSync(configPath)) return {};
+  try {
+    const raw = JSON.parse(readFileSync(configPath, "utf-8"));
+    const mcpSection = raw.mcp;
+    if (!mcpSection || typeof mcpSection !== "object") return {};
 
-export function saveLazyConfig(configPath: string, config: LazyConfig): void {
-  writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n");
-}
+    const servers: Record<string, ServerConfig> = {};
+    for (const [name, config] of Object.entries(mcpSection)) {
+      if (name === "mcp-lazy") continue;
+      const cfg = config as any;
 
-export function mergeServerConfigs(
-  configs: { path: string; servers: Record<string, ServerConfig> }[]
-): Record<string, ServerConfig> {
-  const merged: Record<string, ServerConfig> = {};
-  for (const { servers } of configs) {
-    Object.assign(merged, servers);
+      if (cfg.type === "local" && Array.isArray(cfg.command) && cfg.command.length > 0) {
+        // Stdio server: command is array, first element is command, rest are args
+        servers[name] = {
+          command: cfg.command[0],
+          args: cfg.command.slice(1),
+          ...(cfg.environment && { env: cfg.environment }),
+        };
+      } else if (cfg.type === "remote" && cfg.url) {
+        // HTTP/SSE server
+        servers[name] = {
+          url: cfg.url,
+          args: [],
+          ...(cfg.headers && { headers: cfg.headers }),
+        };
+      }
+    }
+    return servers;
+  } catch {
+    return {};
   }
-  return merged;
 }

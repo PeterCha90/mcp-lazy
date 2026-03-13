@@ -1,10 +1,11 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { ServerConfig } from "../utils/config.js";
+import { VERSION } from "../version.js";
 
 interface LoadedServer {
   client: Client;
-  transport: StdioClientTransport;
+  transport: unknown;
   loadedAt: Date;
 }
 
@@ -47,8 +48,6 @@ export class ServerLoader {
       throw new Error(`Unknown server: ${serverName}`);
     }
 
-    const timeoutMs = 30000;
-
     try {
       return await this.attemptConnect(serverName, config);
     } catch (error) {
@@ -65,20 +64,24 @@ export class ServerLoader {
   }
 
   private async attemptConnect(serverName: string, config: ServerConfig): Promise<Client> {
+    const timeoutMs = 30000;
+
+    if (!config.command) {
+      throw new Error(`Server ${serverName} has no command configured`);
+    }
+
     const client = new Client({
       name: `mcp-lazy-proxy/${serverName}`,
-      version: "0.1.0",
+      version: VERSION,
     });
 
     const env = { ...process.env, ...config.env } as Record<string, string>;
-
     const transport = new StdioClientTransport({
       command: config.command,
       args: config.args,
       env,
     });
 
-    const timeoutMs = 30000;
     const connectPromise = client.connect(transport);
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error(`Server ${serverName} timed out after ${timeoutMs}ms`)), timeoutMs)
@@ -88,7 +91,7 @@ export class ServerLoader {
 
     this.servers.set(serverName, {
       client,
-      transport,
+      transport: transport as unknown,
       loadedAt: new Date(),
     });
 

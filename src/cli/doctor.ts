@@ -1,14 +1,10 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-import { loadLazyConfig } from "../utils/config.js";
+import { loadServersBackup } from "../utils/config.js";
 import { AGENTS, isProxyRegistered } from "../agents/index.js";
 
 const TOKENS_PER_TOOL = 650;
 const PROXY_BASE_TOKENS = 2100;
 
 export async function runDoctor(): Promise<void> {
-  const cwd = process.cwd();
-  const configPath = resolve(cwd, "mcp-lazy-config.json");
   let hasIssues = false;
 
   console.log("\nmcp-lazy status check\n");
@@ -23,11 +19,18 @@ export async function runDoctor(): Promise<void> {
     hasIssues = true;
   }
 
-  // 2. Check mcp-lazy-config.json
-  if (existsSync(configPath)) {
-    console.log(`  ✓ mcp-lazy-config.json found`);
+  // 2. Check servers backup
+  const servers = loadServersBackup();
+  const serverCount = Object.keys(servers).length;
+
+  if (serverCount > 0) {
+    const serverNames = Object.keys(servers);
+    console.log(`  ✓ ${serverCount} MCP server(s) registered`);
+    for (const name of serverNames) {
+      console.log(`    - ${name}`);
+    }
   } else {
-    console.log(`  ✗ mcp-lazy-config.json not found -> run 'mcp-lazy init'`);
+    console.log(`  ✗ No MCP servers registered -> run 'mcp-lazy add --<agent>'`);
     hasIssues = true;
   }
 
@@ -40,8 +43,7 @@ export async function runDoctor(): Promise<void> {
       console.log(`  ✓ ${agent.displayName} registered`);
       registeredCount++;
     } else {
-      const flag = agent.name === "claude-code" ? "" : ` -> mcp-lazy add --${agent.name}`;
-      console.log(`  - ${agent.displayName} not registered${flag}`);
+      console.log(`  - ${agent.displayName} not registered -> mcp-lazy add --${agent.name}`);
     }
   }
 
@@ -51,28 +53,18 @@ export async function runDoctor(): Promise<void> {
   }
 
   // 4. Token savings estimation
-  if (existsSync(configPath)) {
-    try {
-      const config = loadLazyConfig(configPath);
-      const serverCount = Object.keys(config.servers).length;
+  if (serverCount > 0) {
+    const estimatedTools = serverCount * 15;
+    const estimatedTokens = estimatedTools * TOKENS_PER_TOOL;
+    const savings = estimatedTokens > 0
+      ? Math.round(((estimatedTokens - PROXY_BASE_TOKENS) / estimatedTokens) * 100)
+      : 0;
 
-      // Rough estimate: assume average of 15 tools per server
-      const estimatedTools = serverCount * 15;
-      const estimatedTokens = estimatedTools * TOKENS_PER_TOOL;
-      const savings = estimatedTokens > 0
-        ? Math.round(((estimatedTokens - PROXY_BASE_TOKENS) / estimatedTokens) * 100)
-        : 0;
-
-      console.log(`\n  Token savings estimate:`);
-      console.log(`    ${serverCount} server(s) configured`);
-      console.log(`    Without mcp-lazy: ~${estimatedTokens.toLocaleString()} tokens`);
-      console.log(`    With mcp-lazy:     ${PROXY_BASE_TOKENS.toLocaleString()} tokens`);
-      console.log(`    Estimated savings: ${savings}%`);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      console.log(`\n  ✗ Could not parse mcp-lazy-config.json: ${message}`);
-      hasIssues = true;
-    }
+    console.log(`\n  Token savings estimate:`);
+    console.log(`    ${serverCount} server(s) registered`);
+    console.log(`    Without mcp-lazy: ~${estimatedTokens.toLocaleString()} tokens`);
+    console.log(`    With mcp-lazy:     ${PROXY_BASE_TOKENS.toLocaleString()} tokens`);
+    console.log(`    Estimated savings: ${savings}%`);
   }
 
   console.log("");

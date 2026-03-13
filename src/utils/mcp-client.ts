@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { VERSION } from "../version.js";
 
 export interface ToolDefinition {
   name: string;
@@ -9,7 +10,7 @@ export interface ToolDefinition {
 
 export interface ServerConnection {
   client: Client;
-  transport: StdioClientTransport;
+  transport: unknown;
 }
 
 export async function connectToServer(
@@ -19,7 +20,7 @@ export async function connectToServer(
 ): Promise<ServerConnection> {
   const client = new Client({
     name: "mcp-lazy-proxy",
-    version: "0.1.0",
+    version: VERSION,
   });
 
   const mergedEnv = { ...process.env, ...env } as Record<string, string>;

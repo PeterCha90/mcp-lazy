@@ -1,6 +1,6 @@
 {
   "name": "mcp-lazy",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "description": "MCP lazy loading proxy for AI agents - reduce context window token usage by 90%+",
   "type": "module",
   "bin": {
@@ -9,6 +9,7 @@
   "main": "./dist/index.js",
   "files": [
     "dist",
+    "docs",
     "README.md"
   ],
   "scripts": {

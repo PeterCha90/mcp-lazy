@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { ToolRegistry } from "./registry.js";
 import { ServerLoader } from "./loader.js";
+import { VERSION } from "../version.js";
 
 export async function createProxyServer(
   registry: ToolRegistry,
@@ -10,7 +11,7 @@ export async function createProxyServer(
 ): Promise<McpServer> {
   const server = new McpServer({
     name: "mcp-lazy",
-    version: "0.1.0",
+    version: VERSION,
   });
 
   // Tool 1: mcp_search_tools

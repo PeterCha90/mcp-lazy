@@ -1,91 +1,83 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { runDoctor } from "./doctor.js";
+import { AGENTS, isProxyRegistered } from "../agents/index.js";
+import { loadServersBackup } from "../utils/config.js";
 
-// We need to mock modules before importing runDoctor
-vi.mock("../agents/index.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../agents/index.js")>();
+vi.mock("../agents/index.js", async () => {
+  const actual = await vi.importActual("../agents/index.js");
   return {
     ...actual,
     isProxyRegistered: vi.fn().mockReturnValue(false),
-    AGENTS: actual.AGENTS,
   };
 });
 
-import { runDoctor } from "./doctor.js";
-import { isProxyRegistered, AGENTS } from "../agents/index.js";
+vi.mock("../utils/config.js", async () => {
+  const actual = await vi.importActual("../utils/config.js");
+  return {
+    ...actual,
+    loadServersBackup: vi.fn().mockReturnValue({}),
+  };
+});
 
 describe("runDoctor", () => {
-  let tempDir: string;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
-  let originalCwd: string;
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), "mcp-lazy-test-"));
     consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    originalCwd = process.cwd();
-    process.chdir(tempDir);
+    vi.mocked(loadServersBackup).mockReturnValue({});
+    vi.mocked(isProxyRegistered).mockReturnValue(false);
   });
 
   afterEach(() => {
-    process.chdir(originalCwd);
     consoleSpy.mockRestore();
-    vi.mocked(isProxyRegistered).mockReturnValue(false);
-    rmSync(tempDir, { recursive: true, force: true });
+    vi.restoreAllMocks();
   });
 
   it("prints header", async () => {
     await runDoctor();
-    expect(consoleSpy).toHaveBeenCalledWith("\nmcp-lazy status check\n");
+    const calls = consoleSpy.mock.calls.map((c) => c[0]);
+    expect(calls.some((c) => typeof c === "string" && c.includes("mcp-lazy status check"))).toBe(true);
   });
 
   it("reports Node.js version check (passes for current runtime)", async () => {
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const nodeCheck = calls.find((c) => typeof c === "string" && c.includes("Node.js"));
+    const nodeCheck = calls.find(
+      (c) => typeof c === "string" && c.includes("Node.js")
+    );
     expect(nodeCheck).toBeDefined();
-    // Current runtime should pass (>= 18)
     expect(nodeCheck).toContain("✓");
   });
 
-  it("reports missing mcp-lazy-config.json", async () => {
+  it("reports no servers when backup is empty", async () => {
+    vi.mocked(loadServersBackup).mockReturnValue({});
+
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const configCheck = calls.find(
-      (c) => typeof c === "string" && c.includes("mcp-lazy-config.json")
+    const serverCheck = calls.find(
+      (c) => typeof c === "string" && c.includes("MCP server")
     );
-    expect(configCheck).toBeDefined();
-    expect(configCheck).toContain("✗");
-    expect(configCheck).toContain("mcp-lazy init");
+    expect(serverCheck).toBeDefined();
+    expect(serverCheck).toContain("✗");
   });
 
-  it("reports found mcp-lazy-config.json when present", async () => {
-    const configPath = join(tempDir, "mcp-lazy-config.json");
-    writeFileSync(
-      configPath,
-      JSON.stringify({
-        version: "1.0",
-        servers: {
-          "test-server": { command: "test", args: [] },
-        },
-      })
-    );
+  it("reports servers when backup has entries", async () => {
+    vi.mocked(loadServersBackup).mockReturnValue({
+      "test-server": { command: "test", args: [] },
+    });
 
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const configCheck = calls.find(
-      (c) => typeof c === "string" && c.includes("mcp-lazy-config.json") && c.includes("found")
+    const serverCheck = calls.find(
+      (c) => typeof c === "string" && c.includes("MCP server") && c.includes("✓")
     );
-    expect(configCheck).toBeDefined();
-    expect(configCheck).toContain("✓");
+    expect(serverCheck).toBeDefined();
   });
 
   it("checks each agent registration status", async () => {
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
 
-    // Each agent should appear in output
     for (const agent of AGENTS) {
       const agentLine = calls.find(
         (c) => typeof c === "string" && c.includes(agent.displayName)
@@ -117,58 +109,36 @@ describe("runDoctor", () => {
       (c) => typeof c === "string" && c.includes("Cursor")
     );
     expect(cursorLine).toContain("-");
-    expect(cursorLine).toContain("not registered");
   });
 
-  it("shows token savings when config exists with servers", async () => {
-    const configPath = join(tempDir, "mcp-lazy-config.json");
-    writeFileSync(
-      configPath,
-      JSON.stringify({
-        version: "1.0",
-        servers: {
-          postgres: { command: "pg-mcp", args: [] },
-          redis: { command: "redis-mcp", args: [] },
-        },
-      })
-    );
+  it("shows token savings when servers exist", async () => {
+    vi.mocked(loadServersBackup).mockReturnValue({
+      "test-server": { command: "test", args: [] },
+      "other-server": { command: "other", args: [] },
+    });
 
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const savingsLine = calls.find(
-      (c) => typeof c === "string" && c.includes("savings")
+    const tokenLine = calls.find(
+      (c) => typeof c === "string" && c.includes("Token savings")
     );
-    expect(savingsLine).toBeDefined();
+    expect(tokenLine).toBeDefined();
   });
 
   it("reports all checks passed when no issues", async () => {
-    const configPath = join(tempDir, "mcp-lazy-config.json");
-    writeFileSync(
-      configPath,
-      JSON.stringify({
-        version: "1.0",
-        servers: { s1: { command: "cmd", args: [] } },
-      })
-    );
+    vi.mocked(loadServersBackup).mockReturnValue({
+      "s": { command: "c", args: [] },
+    });
     vi.mocked(isProxyRegistered).mockReturnValue(true);
 
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const passedLine = calls.find(
-      (c) => typeof c === "string" && c.includes("All checks passed")
-    );
-    expect(passedLine).toBeDefined();
+    expect(calls.some((c) => typeof c === "string" && c.includes("All checks passed"))).toBe(true);
   });
 
   it("reports issues found when there are problems", async () => {
-    // No config file = issue
-    vi.mocked(isProxyRegistered).mockReturnValue(false);
-
     await runDoctor();
     const calls = consoleSpy.mock.calls.map((c) => c[0]);
-    const issuesLine = calls.find(
-      (c) => typeof c === "string" && c.includes("issues found")
-    );
-    expect(issuesLine).toBeDefined();
+    expect(calls.some((c) => typeof c === "string" && c.includes("issues found"))).toBe(true);
   });
 });
