@@ -2,7 +2,7 @@ import { loadServersBackup } from "../utils/config.js";
 import { AGENTS, isProxyRegistered } from "../agents/index.js";
 
 const TOKENS_PER_TOOL = 650;
-const PROXY_BASE_TOKENS = 2100;
+const PROXY_BASE_TOKENS = 350;
 
 export async function runDoctor(): Promise<void> {
   let hasIssues = false;

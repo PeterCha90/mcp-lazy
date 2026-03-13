@@ -16,7 +16,6 @@ const BANNER = `
 
 interface AddOptions {
   cursor?: boolean;
-  windsurf?: boolean;
   opencode?: boolean;
   antigravity?: boolean;
   codex?: boolean;
@@ -34,7 +33,6 @@ export async function runAdd(options: AddOptions): Promise<void> {
   } else {
     const flagMap: Record<string, boolean | undefined> = {
       cursor: options.cursor,
-      windsurf: options.windsurf,
       opencode: options.opencode,
       antigravity: options.antigravity,
       codex: options.codex,
@@ -53,7 +51,6 @@ export async function runAdd(options: AddOptions): Promise<void> {
   if (targets.length === 0) {
     console.log("  No agent specified. Use one of:");
     console.log("    mcp-lazy add --cursor");
-    console.log("    mcp-lazy add --windsurf");
     console.log("    mcp-lazy add --opencode");
     console.log("    mcp-lazy add --antigravity");
     console.log("    mcp-lazy add --codex");

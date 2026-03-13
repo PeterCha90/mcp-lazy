@@ -16,7 +16,6 @@ program
   .command("add")
   .description("Register mcp-lazy proxy with an agent")
   .option("--cursor", "Register with Cursor")
-  .option("--windsurf", "Register with Windsurf")
   .option("--opencode", "Register with Opencode")
   .option("--antigravity", "Register with Antigravity")
   .option("--codex", "Register with Codex")

@@ -24,11 +24,6 @@ export const AGENTS: AgentInfo[] = [
     configPaths: ["~/.cursor/mcp.json"],
   },
   {
-    name: "windsurf",
-    displayName: "Windsurf",
-    configPaths: ["~/.codeium/windsurf/mcp_config.json"],
-  },
-  {
     name: "opencode",
     displayName: "Opencode",
     configPaths: ["~/.config/opencode/config.json"],

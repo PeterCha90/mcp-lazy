@@ -30,12 +30,6 @@ describe("agents", () => {
       expect(cursor!.configPaths.length).toBeGreaterThan(0);
     });
 
-    it("contains windsurf agent", () => {
-      const windsurf = AGENTS.find((a) => a.name === "windsurf");
-      expect(windsurf).toBeDefined();
-      expect(windsurf!.displayName).toBe("Windsurf");
-    });
-
     it("contains opencode agent", () => {
       const opencode = AGENTS.find((a) => a.name === "opencode");
       expect(opencode).toBeDefined();
@@ -58,8 +52,8 @@ describe("agents", () => {
       expect(codex!.configPaths.some((p) => p.includes("config.toml"))).toBe(true);
     });
 
-    it("has at least 5 agents", () => {
-      expect(AGENTS.length).toBeGreaterThanOrEqual(5);
+    it("has at least 4 agents", () => {
+      expect(AGENTS.length).toBeGreaterThanOrEqual(4);
     });
 
     it("every agent has required fields", () => {

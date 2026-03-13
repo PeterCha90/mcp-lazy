@@ -24,8 +24,7 @@
     "lazy-loading",
     "proxy",
     "ai-agent",
-    "cursor",
-    "windsurf"
+    "cursor"
   ],
   "license": "MIT",
   "dependencies": {

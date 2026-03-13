@@ -29,7 +29,7 @@ mcp-lazy 없이:
            = 시작 시 100개 툴 전부 로딩 (~67,000 토큰)
 
 mcp-lazy 적용 후:
-  에이전트 → mcp-lazy 프록시 (2개 툴만, ~2,100 토큰)
+  에이전트 → mcp-lazy 프록시 (2개 툴만, ~350 토큰)
                   ↓ 필요할 때만
              서버A / B / C (on-demand 로딩)
              URL 서버 (Notion, Slack 등) — mcp-remote 브릿지 경유
@@ -54,13 +54,12 @@ mcp-lazy 적용 후:
 
 ## 지원 에이전트
 
-| 에이전트 | 상태 |
-|----------|------|
-| Cursor | ✓ 지원 |
-| Windsurf | ✓ 지원 |
-| Opencode | ✓ 지원 |
-| Antigravity | ✓ 지원 |
-| Codex | ✓ 지원 |
+| 에이전트    | 상태                   |
+| ----------- | ---------------------- |
+| Cursor      | ✓ 지원                 |
+| Opencode    | ✓ 지원                 |
+| Antigravity | ✓ 지원                 |
+| Codex       | ✓ 지원                 |
 | Claude Code | 네이티브 지원 (불필요) |
 
 ## 명령어
@@ -77,7 +76,7 @@ npx mcp-lazy add --all           # 모든 에이전트에 등록
 
 옵션:
 
-- `--cursor`, `--windsurf`, `--opencode`, `--antigravity`, `--codex` — 대상 에이전트
+- `--cursor`, `--opencode`, `--antigravity`, `--codex` — 대상 에이전트
 - `--all` — 모든 에이전트에 등록
 
 ### `npx mcp-lazy doctor`
@@ -91,9 +90,8 @@ $ npx mcp-lazy doctor
 ✓ 7개 MCP 서버 등록됨
   - github, notion, slack, postgres, filesystem, memory, puppeteer
 ✓ Cursor: 등록됨
-✗ Windsurf: 미등록 → npx mcp-lazy add --windsurf
 
-토큰 절감: 67,300 → 2,100 (97% 절감)
+토큰 절감: 67,300 → 350 (99.5% 절감)
 ```
 
 ## URL 및 OAuth 지원
@@ -112,19 +110,46 @@ stdio:   npx mcp-remote https://mcp.notion.com/sse
 
 에이전트가 `mcp_search_tools("DB 쿼리 실행")`을 호출하면, 프록시가 등록된 모든 툴에서 가중치 기반 검색을 수행합니다:
 
-| 매칭 유형 | 점수 |
-|-----------|------|
+| 매칭 유형         | 점수 |
+| ----------------- | ---- |
 | 툴 이름 정확 일치 | +1.0 |
 | 툴 이름 부분 일치 | +0.8 |
-| 설명 키워드 일치 | +0.6 |
-| 서버 설명 일치 | +0.4 |
+| 설명 키워드 일치  | +0.6 |
+| 서버 설명 일치    | +0.4 |
 
 결과는 관련도 순으로 정렬되어 에이전트에 반환됩니다.
+
+## FAQ
+
+### Q: 설치 중 "Error: Unexpected error"가 발생합니다
+
+설정 파일 디렉토리에 대한 읽기/쓰기 권한이 있는지 확인하세요. 예시:
+
+- Cursor: `~/.cursor/mcp.json`
+- Codex: `~/.codex/config.toml`
+- Opencode: `~/.config/opencode/config.json`
+- Antigravity: `~/.gemini/antigravity/mcp_config.json`
+
+`ls -la` 명령어로 해당 경로의 권한을 확인하세요. 필요 시 `chmod 644 <경로>`로 수정할 수 있습니다.
+
+### Q: mcp-lazy 설정 이후 새로운 MCP 서버를 추가했습니다. 어떻게 반영하나요?
+
+새 서버를 에이전트의 MCP 설정에 평소처럼 추가한 뒤, add 명령어를 다시 실행하면 됩니다:
+
+```bash
+npx mcp-lazy add --cursor    # 새 서버를 자동으로 감지하여 반영
+```
+
+mcp-lazy가 새 서버를 감지하여 `~/.mcp-lazy/servers.json`에 추가하고, 프록시 설정은 그대로 유지합니다.
+
+## 지원 범위
+
+mcp-lazy는 현재 **글로벌 MCP 설정만 지원**합니다 (예: `~/.cursor/mcp.json`). 프로젝트 레벨 MCP 설정 (예: 프로젝트 루트의 `.cursor/mcp.json`)은 아직 지원하지 않습니다.
 
 ## 요구사항
 
 - Node.js 18+
-- 기존 MCP 서버 설정
+- 기존 MCP 서버 설정 (글로벌 스코프)
 
 ## 라이선스
 

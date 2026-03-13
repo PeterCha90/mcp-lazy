@@ -38,7 +38,7 @@ Without mcp-lazy:
         = 100 tools loaded at startup (~67,000 tokens)
 
 With mcp-lazy:
-  Agent → mcp-lazy proxy (2 tools only, ~2,100 tokens)
+  Agent → mcp-lazy proxy (2 tools only, ~350 tokens)
               ↓ on-demand
          Server A / B / C (loaded only when needed)
          URL servers (Notion, Slack, etc.) via mcp-remote bridge
@@ -66,7 +66,6 @@ The proxy reads from `~/.mcp-lazy/servers.json` at runtime — that's where all 
 | Agent       | Status                      |
 | ----------- | --------------------------- |
 | Cursor      | ✓ Supported                 |
-| Windsurf    | ✓ Supported                 |
 | Opencode    | ✓ Supported                 |
 | Antigravity | ✓ Supported                 |
 | Codex       | ✓ Supported                 |
@@ -86,7 +85,7 @@ npx mcp-lazy add --all           # register with all agents
 
 Options:
 
-- `--cursor`, `--windsurf`, `--opencode`, `--antigravity`, `--codex` — target agent
+- `--cursor`, `--opencode`, `--antigravity`, `--codex` — target agent
 - `--all` — register with all agents
 
 ### `npx mcp-lazy doctor`
@@ -100,9 +99,8 @@ $ npx mcp-lazy doctor
 ✓ 7 MCP server(s) registered
   - github, notion, slack, postgres, filesystem, memory, puppeteer
 ✓ Cursor: registered
-✗ Windsurf: not registered → npx mcp-lazy add --windsurf
 
-Token savings: 67,300 → 2,100 (97% reduction)
+Token savings: 67,300 → 350 (99.5% reduction)
 ```
 
 ## URL & OAuth Support
@@ -130,10 +128,37 @@ When an agent calls `mcp_search_tools("query database")`, the proxy searches acr
 
 Results are sorted by relevance and returned to the agent.
 
+## FAQ
+
+### Q: I'm getting "Error: Unexpected error" during setup.
+
+Check that you have read/write permissions for the config directory. For example:
+
+- Cursor: `~/.cursor/mcp.json`
+- Codex: `~/.codex/config.toml`
+- Opencode: `~/.config/opencode/config.json`
+- Antigravity: `~/.gemini/antigravity/mcp_config.json`
+
+Try running `ls -la` on the relevant path to verify permissions. If needed, fix with `chmod 644 <path>`.
+
+### Q: I installed a new MCP server after setting up mcp-lazy. How do I add it?
+
+Simply add the new server to your agent's MCP config as usual, then re-run the add command:
+
+```bash
+npx mcp-lazy add --cursor    # re-scans and picks up the new server
+```
+
+mcp-lazy will detect the new server, add it to `~/.mcp-lazy/servers.json`, and keep the proxy config intact.
+
+## Scope
+
+mcp-lazy currently supports **global MCP configurations only** (e.g., `~/.cursor/mcp.json`). Project-level MCP configs (e.g., `.cursor/mcp.json` in a project root) are not yet supported.
+
 ## Requirements
 
 - Node.js 18+
-- Existing MCP server configurations
+- Existing MCP server configurations (global scope)
 
 ## License
 
