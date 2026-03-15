@@ -5,7 +5,8 @@
       "Bash(npx vitest:*)",
       "Bash(ls /Users/peter/Desktop/Solopreneur/mcp-lazy/.omc/state/*.json 2>/dev/null)",
       "Bash(npm run:*)",
-      "Bash(npm version:*)"
+      "Bash(npm version:*)",
+      "Bash(git add:*)"
     ]
   }
 }
