@@ -20,6 +20,7 @@
 <br>
 
 `82 tools exposed at startup`
+
 ![Before mcp-lazy](./public/before.png)
 
 👇 `Just 2 with mcp-lazy`
